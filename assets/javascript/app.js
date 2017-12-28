@@ -1,6 +1,10 @@
 
 var competitions = '';
 var next_fixtures = [];
+var modal = $('#team-view');
+var modal_flag = false;
+modal.hide();
+
 
 $.ajax({
   headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
@@ -9,9 +13,7 @@ $.ajax({
   type: 'GET',
   }).done(function(response) {
 
-    console.log(response);
     competitions = response;
-    console.log(competitions);
 
     for(var i = 0; i < competitions.length; i++){
 
@@ -26,6 +28,9 @@ $.ajax({
 function displayFixtures(){
 
   $('#fixture-view').empty();
+  $('#team-view').empty();
+  next_fixtures.length = 0;
+
   var current_competition = $(this).attr('id');
 
   $.ajax({
@@ -40,7 +45,7 @@ function displayFixtures(){
 
     for(var i = 0; i < response.fixtures.length; i++){
 
-      if(response.fixtures[i].status == 'TIMED'){
+      if(response.fixtures[i].status == 'TIMED' || response.fixtures[i].status == 'SCHEDULED'){
 
         if(match_day == 0){
 
@@ -56,16 +61,20 @@ function displayFixtures(){
       }
     }
 
+    $('#fixture-view').append('<h4>All times seen are Pacific Standard Time</h4>');
+
     for(var j = 0; j < next_fixtures.length; j++){
 
       var away_team = next_fixtures[j].awayTeamName;
       var home_team = next_fixtures[j].homeTeamName;
-      console.log(away_team + ' at ' + home_team);
+      var date = moment(next_fixtures[j].date).format('dddd, MMMM Do YYYY, h:mm:ss a');
+
       var fixture_div = $('<div>');
       fixture_div.attr('id', 'fixture');
       fixture_div.html('<button class="team-btn" team-name="' + away_team + '"fixture-number=' 
                         + j + ' location="away">' + away_team + '</button>' + ' at ' + '<button class="team-btn" team-name="' 
                         + home_team + '"fixture-number=' + j + ' location="home">' + home_team + '</button>');
+      fixture_div.append('<p>Kick Off: ' + date + '</p>');
       $('#fixture-view').append(fixture_div);
 
     }
@@ -76,8 +85,6 @@ function displayFixtures(){
 function displayTeamInfo(){
 
   $('#team-view').empty();
-  var modal = $('#team-view');
-
   modal.show();
 
   var team_name = $(this).attr('team-name');
@@ -101,6 +108,8 @@ function displayTeamInfo(){
 
     console.log(response);
     var team_div = $('<div>');
+    team_div.addClass('modal-content');
+    team_div.append('<span class="close">&times;</span>');
     var team_name = response.name;
     var short_name = response.shortName;
     var crest_url = response.crestUrl;
@@ -108,23 +117,60 @@ function displayTeamInfo(){
     team_div.append('<h2>' + team_name + '</h2>');
     team_div.append('<h3>Shorthand: ' + short_name + '</h3>');
     team_div.append('<img src="' + crest_url + '" alt="team crest"></img');
+
+    var fixture_btn = $('<button>');
+    fixture_btn.text('Click to see Current Form')
+    fixture_btn.attr('fixtures', response._links.fixtures.href);
+    fixture_btn.attr('id', 'fixture-btn');
+    team_div.append(fixture_btn);
+
+    var player_btn = $('<button>');
+    player_btn.text('Click to see Current Squad');
+    player_btn.attr('id', 'player-btn');
+    player_btn.attr('players', response._links.players.href);
+    team_div.append(player_btn);
+
     modal.append(team_div);
-    
+    modal.append('<br>');
+
+    modal_flag = true;
+
   });
 
 
 
 }
 
+function displayForm(){
+    var queryURL = $(this).attr('fixtures');
+    console.log(queryURL);
+    $.ajax({
+      headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
+      url: queryURL,
+      dataType: 'json',
+      type: 'GET',
+    }).done(function(response){
+
+      $('#team-view').empty();
+      console.log(response);
+
+    });
+}
+
+function displaySquad(){
+
+}
+
 $(document).on('click', '.competition-btn', displayFixtures);
 $(document).on('click', '.team-btn', displayTeamInfo);
+$(document).on('click', '#fixture-btn', displayForm);
+$(document).on('click', '#player-btn', displaySquad);
 
-$(document).on('click', function(event){
+$(document).on('click', '.close', function(){
+
   var modal = $('#team-view');
 
-  if(event.target == modal){
+  modal.hide('slow');
+  modal_flag = false;
 
-    modal.hide();
-
-  }
 });
