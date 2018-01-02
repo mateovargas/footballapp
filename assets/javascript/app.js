@@ -144,7 +144,16 @@ function displayTeamInfo(){
 }
 
 function displayForm(){
+
     var queryURL = $(this).attr('fixtures');
+    var total_goals = 0;
+    var home_goals = 0;
+    var away_goals = 0;
+    var goals_against = 0;
+    var wins = 0;
+    var draws = 0;
+    var losses = 0;
+
     console.log(queryURL);
     $.ajax({
       headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
@@ -172,7 +181,7 @@ function displayForm(){
         }
 
         var matchday = response.fixtures[i].matchday;
-        var date = response.fixtures[i].date;
+        var date = moment(response.fixtures[i].date).format("MMMM Do YYYY, h:mm a");
         var home_team = response.fixtures[i].homeTeamName;
         var away_team = response.fixtures[i].awayTeamName;
         var result = response.fixtures[i].result;
@@ -191,17 +200,22 @@ function displayForm(){
            current_team == away_team && (result.goalsAwayTeam > result.goalsHomeTeam)){
 
           fixture_row.append('<th id="result-col">W</th>');
+          fixture_row.css('background-color', 'green');
+          wins++;
 
         }
-        else if(current_team == home_team && (result.goalsHomeTeam < result.goalsAwayTeam) || 
-                current_team == away_team && (result.goalsAwayTeam < result.goalsHomeTeam)){
+        else if(current_team == home_team && (result.goalsHomeTeam == result.goalsAwayTeam) || 
+                current_team == away_team && (result.goalsAwayTeam == result.goalsHomeTeam)){
 
-          fixture_row.append('<th id="result-col">W</th>');
+          fixture_row.append('<th id="result-col">D</th>');
+          draws++;
 
         }
         else{
 
-          fixture_row.append('<th id="result-col">D</th>');
+          fixture_row.append('<th id="result-col">L</th>');
+          fixture_row.css('background-color', 'red');
+          losses++;
         
         }
 
@@ -211,6 +225,12 @@ function displayForm(){
       }
   
       table_div.append(fixture_table);
+      //ADD DIV TO DISPLAY NUMERICAL RECORD, GOALS FOR AND AGAINST,
+
+      var stats_div = $('<div>');
+
+
+
       modal.append(table_div);
       modal_flag = true;
     });
