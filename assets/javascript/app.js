@@ -9,7 +9,7 @@ modal.hide();
 
 $.ajax({
   headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
-  url: 'http://api.football-data.org/v1/competitions/',
+  url: 'https://api.football-data.org/v1/competitions/',
   dataType: 'json',
   type: 'GET',
   }).done(function(response) {
