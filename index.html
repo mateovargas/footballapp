@@ -5,25 +5,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Football Fanatic</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css?family=Bungee|Roboto|Ubuntu" rel="stylesheet">
+  <!-- Moment.js -->
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+  <!-- CSS Styles -->
   <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
 
 </head>
 <body>
 
-  <div class="main-container">
-    <div id="header-view">
-      <h1>Football Fixtures</h1>
+  <div class="container">
+    <div class="col-xs-12">
+
+      <div class='jumbotron text-center'>
+        <h1>Football Fixtures</h1>
+      </div>
+
+      <div id="buttons-view">
+        <h3>Select a competition to view</h3>
+      </div>
+      <br>
+      <div id="fixture-view"></div>
+
+      <div id='team-view' class='modal'></div>
     </div>
-
-    <div id="buttons-view">
-      <h3>Select a competition to view</h3>
-    </div>
-    <br>
-    <div id="fixture-view"></div>
-
-    <div id='team-view' class='modal'></div>
-
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

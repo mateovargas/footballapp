@@ -4,6 +4,7 @@ var next_fixtures = [];
 var modal = $('#team-view');
 var modal_flag = false;
 var current_team = '';
+
 modal.hide();
 
 
@@ -169,10 +170,12 @@ function displayForm(){
       var table_div = $('<div>');
       table_div.addClass('modal-content');
       table_div.append('<span class="close">&times;</span>');
+      table_div.append('<span id="back">&larr;</span>');
+      $('#back').attr('team', response._links.team.href);
 
       var fixture_table = $('<table>');
       fixture_table.attr('id', 'player-table');
-      fixture_table.append('<tr><th>Match Day</th><th>Date</th><th>Home</th><th>Away</th><th>Home Goals</th><th>Away Goals</th><th>Result</th></tr>');
+      fixture_table.append('<tr><th>Match Day </th><th>Date</th><th>Home</th><th>Away</th><th>Home Goals</th><th>Away Goals</th><th>Result</th></tr>');
 
       for(var i = 0; i < response.fixtures.length; i++){
 
@@ -254,6 +257,9 @@ function displaySquad(){
     var table_div = $('<div>');
     table_div.addClass('modal-content');
     table_div.append('<span class="close">&times;</span>');
+    table_div.append('<span class="back">&larr;</span>');
+    $('.back').attr('team', response._links.team);
+
 
     var player_table = $('<table>');
     player_table.attr('id', 'player-table');
@@ -267,6 +273,7 @@ function displaySquad(){
       player_row.append('<th>' + response.players[i].position + '</th>');
       player_row.append('<th>' + response.players[i].nationality + '</th>');
       player_table.append(player_row);
+
     }
 
     table_div.append(player_table);
@@ -287,5 +294,11 @@ $(document).on('click', '.close', function(){
 
   modal.hide('slow');
   modal_flag = false;
+
+});
+
+$(document).on('click', '#back', function(){
+
+  console.log($(this).attr('team'));
 
 });
