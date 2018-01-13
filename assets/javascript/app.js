@@ -16,16 +16,71 @@ $.ajax({
   }).done(function(response) {
 
     competitions = response;
+    console.log(response);
 
     for(var i = 0; i < competitions.length; i++){
 
-      var competition_button = $('<button class="competition-btn">' + competitions[i].caption + '</button>');
+      var competition_button = $('<button class="btn btn-default btn-xs center-block competition-btn">' + competitions[i].caption + '</button>');
       competition_button.attr('id', i);
       $('#buttons-view').append(competition_button);
 
     }
 
-  });
+});
+
+$.ajax({
+  url: 'https://newsapi.org/v2/top-headlines?' +
+        'sources=bbc-sport&' +
+        'apiKey=e4b37b3a62d3437e9bc4454ef752b038',
+  dataType: 'json',
+  type: 'GET',
+}).done(function(response){
+
+  var articles_div = displayArticles(response);
+  $('#bbc-view').append(articles_div);
+
+});//BBC CALL
+
+$.ajax({
+  url: 'https://newsapi.org/v2/top-headlines?' +
+        'sources=espn&' +
+        'apiKey=e4b37b3a62d3437e9bc4454ef752b038',
+  dataType: 'json',
+  type: 'GET',
+}).done(function(response){
+
+  var articles_div = displayArticles(response);
+  $('#espn-view').append(articles_div);
+
+});//ESPN CALL
+
+$.ajax({
+  url: 'https://newsapi.org/v2/top-headlines?' +
+        'sources=marca&' +
+        'apiKey=e4b37b3a62d3437e9bc4454ef752b038',
+  dataType: 'json',
+  type: 'GET',
+}).done(function(response){
+
+  var articles_div = displayArticles(response);
+  $('#marca-view').append(articles_div);
+
+});//marca CALL
+
+$.ajax({
+  url: 'https://newsapi.org/v2/top-headlines?' +
+        'sources=football-italia&' +
+        'apiKey=e4b37b3a62d3437e9bc4454ef752b038',
+  dataType: 'json',
+  type: 'GET',
+}).done(function(response){
+
+  var articles_div = displayArticles(response);
+  $('#italia-view').append(articles_div);
+
+});//italia call
+
+
 
 function displayFixtures(){
 
@@ -73,15 +128,19 @@ function displayFixtures(){
 
       var fixture_div = $('<div>');
       fixture_div.attr('id', 'fixture');
-      fixture_div.html('<button class="team-btn" team-name="' + away_team + '"fixture-number=' 
-                        + j + ' location="away">' + away_team + '</button>' + ' at ' + '<button class="team-btn" team-name="' 
+      fixture_div.html('<button class="btn btn-default btn-xs center-block team-btn" team-name="' + away_team + '"fixture-number=' 
+                        + j + ' location="away">' + away_team + '</button>' + ' at ' + '<button class="btn btn-default btn-xs center-block team-btn" team-name="' 
                         + home_team + '"fixture-number=' + j + ' location="home">' + home_team + '</button>');
       fixture_div.append('<p>Kick Off: ' + date + '</p>');
       $('#fixture-view').append(fixture_div);
 
     }
 
+    $('#buttons-view').empty();
+    $('#buttons-view').append('<button id="competitions" class="btn btn-default btn-xs center-block">See Competitions</button>');
   });
+
+  $('#fixture-view').show();
 }
 
 function displayTeamInfo(){
@@ -102,45 +161,7 @@ function displayTeamInfo(){
     var queryURL = next_fixtures[fixture_number]._links.homeTeam.href;
   }
 
-  $.ajax({
-    headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
-    url: queryURL,
-    dataType: 'json',
-    type: 'GET',
-  }).done(function(response){
-
-    console.log(response);
-    var team_div = $('<div>');
-    team_div.addClass('modal-content');
-    team_div.append('<span class="close">&times;</span>');
-    var team_name = response.name;
-    var short_name = response.shortName;
-    var crest_url = response.crestUrl;
-
-    team_div.append('<h2>' + team_name + '</h2>');
-    team_div.append('<h3>Shorthand: ' + short_name + '</h3>');
-    team_div.append('<img src="' + crest_url + '" alt="team crest"></img');
-
-    var fixture_btn = $('<button>');
-    fixture_btn.text('Click to see Current Form')
-    fixture_btn.attr('fixtures', response._links.fixtures.href);
-    fixture_btn.attr('id', 'fixture-btn');
-    team_div.append(fixture_btn);
-
-    var player_btn = $('<button>');
-    player_btn.text('Click to see Current Squad');
-    player_btn.attr('id', 'player-btn');
-    player_btn.attr('players', response._links.players.href);
-    team_div.append(player_btn);
-
-    modal.append(team_div);
-    modal.append('<br>');
-
-    modal_flag = true;
-
-  });
-
-
+  getTeamInfo(queryURL);
 
 }
 
@@ -166,12 +187,16 @@ function displayForm(){
       $('#team-view').empty();
       modal.show();
       console.log(response);
-
+      console.log(response._links.team.href);
       var table_div = $('<div>');
       table_div.addClass('modal-content');
       table_div.append('<span class="close">&times;</span>');
-      table_div.append('<span id="back">&larr;</span>');
-      $('#back').attr('team', response._links.team.href);
+      table_div.append('<span id="back" team="' +
+                        response._links.team.href + '">&larr;</span>');
+      console.log(response._links.team.href);
+
+      var table_row = $('<div>'); 
+      table_row.addClass('row');
 
       var fixture_table = $('<table>');
       fixture_table.attr('id', 'player-table');
@@ -211,6 +236,7 @@ function displayForm(){
                 current_team == away_team && (result.goalsAwayTeam == result.goalsHomeTeam)){
 
           fixture_row.append('<th id="result-col">D</th>');
+          fixture_row.css('background-color', 'yellow');
           draws++;
 
         }
@@ -222,20 +248,65 @@ function displayForm(){
         
         }
 
+        if(current_team == home_team){
+
+          home_goals = home_goals + result.goalsHomeTeam;
+          goals_against = goals_against + result.goalsAwayTeam;
+
+        }
+        else{
+
+          away_goal = away_goals + result.goalsAwayTeam;
+          goals_against = goals_against + result.goalsHomeTeam;
+
+        }
+
+
+
         fixture_table.append(fixture_row);
 
 
       }
-  
+
       table_div.append(fixture_table);
-      //ADD DIV TO DISPLAY NUMERICAL RECORD, GOALS FOR AND AGAINST,
+      table_row.append(table_div);
+
+      total_goals = home_goals + away_goals;
 
       var stats_div = $('<div>');
+      var stats_list = $('<ul id="stats">');
 
+      var record = $('<li id="record">');
+      record.text('Record: ' + wins + '-' + draws + '-' + losses);
 
+      var goals_for = $('<li id="goals-for">');
+      goals_for.text('Goals For: ' + total_goals);
 
-      modal.append(table_div);
-      modal_flag = true;
+      var goals_against_li = $('<li id="goals-against">');
+      goals_against_li.text('Goals Against: ' + goals_against);
+
+      var goal_differential = total_goals - goals_against;
+      var goal_differential_li = $('<li id="goal-differential">');
+      goal_differential_li.text('Goal Differential: ' + goal_differential);
+      if(goal_differential >= 0){
+
+        goal_differential_li.css('color: green');
+
+      }
+      else{
+
+        goal_differential_li.css('color: red');
+
+      }
+
+      stats_list.append(record);
+      stats_list.append(goals_for);
+      stats_list.append(goals_against_li);
+      stats_list.append(goal_differential_li);
+      stats_div.append(stats_list);
+      table_div.append(stats_div);
+
+      modal.append(table_row);
     });
 }
 
@@ -257,8 +328,8 @@ function displaySquad(){
     var table_div = $('<div>');
     table_div.addClass('modal-content');
     table_div.append('<span class="close">&times;</span>');
-    table_div.append('<span class="back">&larr;</span>');
-    $('.back').attr('team', response._links.team);
+    table_div.append('<span id="back" team="' +
+                      response._links.team.href + '">&larr;</span>');
 
 
     var player_table = $('<table>');
@@ -281,6 +352,81 @@ function displaySquad(){
     modal_flag = true;
 
   });
+};
+
+function getTeamInfo(queryURL){
+
+  $.ajax({
+      headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
+      url: queryURL,
+      dataType: 'json',
+      type: 'GET',
+    }).done(function(response){
+
+      console.log(response);
+      var team_div = $('<div>');
+      team_div.addClass('modal-content');
+      team_div.append('<span class="close">&times;</span>');
+      var team_name = response.name;
+
+      var short_name = response.shortName;
+      var crest_url = response.crestUrl;
+
+      team_div.append('<h2>' + team_name + '</h2>');
+      team_div.append('<h3>Shorthand: ' + short_name + '</h3>');
+      team_div.append('<img src="' + crest_url + '" alt="team crest"></img');
+
+      var fixture_btn = $('<button>');
+      fixture_btn.text('Click to see Current Form')
+      fixture_btn.addClass('btn btn-default btn-xs center-block');
+      fixture_btn.attr('fixtures', response._links.fixtures.href);
+      fixture_btn.attr('id', 'fixture-btn');
+      team_div.append(fixture_btn);
+
+      var player_btn = $('<button>');
+      player_btn.text('Click to see Current Squad');
+      player_btn.addClass('btn btn-default btn-xs center-block');
+      player_btn.attr('id', 'player-btn');
+      player_btn.attr('players', response._links.players.href);
+      team_div.append(player_btn);
+
+      modal.append(team_div);
+
+    });
+
+};
+
+function displayArticles(response){
+
+  console.log(response);
+  articles = response;
+  var articles_div = $('<div>');
+  articles_div.attr('id', 'article-view');
+
+  for(var i = 0; i < 3; i++){
+
+    var article = articles.articles[i];
+    console.log(article.url.toString());
+    console.log(article.urlToImage);
+
+    var article_div = $('<div class="article">');
+    var article_link = $('<a href="' + article.url + '" target="_blank">');
+    article_link.attr('id', 'article-link');
+
+    article_link.append('<h4>' + article.title + '</h4>');
+
+    var description_div =$('<p>');
+    var article_description = article.description;
+    description_div.text(article_description);
+    article_link.append(description_div);
+
+    article_div.append(article_link);
+
+    articles_div.append(article_div);
+
+  }
+
+  return articles_div;
 }
 
 $(document).on('click', '.competition-btn', displayFixtures);
@@ -300,5 +446,37 @@ $(document).on('click', '.close', function(){
 $(document).on('click', '#back', function(){
 
   console.log($(this).attr('team'));
+  var queryURL = $(this).attr('team');
+  $('#team-view').empty();
+  getTeamInfo(queryURL);
+  modal.show();
+
+});
+
+$(document).on('click', '#competitions', function(){
+
+  $('#buttons-view').empty();
+  $.ajax({
+  headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
+  url: 'https://api.football-data.org/v1/competitions/',
+  dataType: 'json',
+  type: 'GET',
+  }).done(function(response) {
+
+    competitions = response;
+
+    console.log(response);
+
+    for(var i = 0; i < competitions.length; i++){
+
+      var competition_button = $('<button class="btn btn-default btn-xs center-block competition-btn">' + competitions[i].caption + '</button>');
+      competition_button.attr('id', i);
+      $('#buttons-view').append(competition_button);
+
+    }
+
+  });
+
+  $('#fixture-view').hide();
 
 });
