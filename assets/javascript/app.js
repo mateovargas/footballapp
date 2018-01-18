@@ -80,6 +80,12 @@ $.ajax({
 
 });//italia call
 
+//function that turns http calls to https
+function createHTTPS(link){
+
+  return link.slice(0, 4) + 's' + link.slice(4, link.length);
+
+}
 
 
 function displayFixtures(){
@@ -89,10 +95,10 @@ function displayFixtures(){
   next_fixtures.length = 0;
 
   var current_competition = $(this).attr('id');
-
+  var queryUrl = createHTTPS(competitions[current_competition]._links.fixtures.href);
   $.ajax({
     headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
-    url: competitions[current_competition]._links.fixtures.href,
+    url: queryUrl,
     dataType: 'json',
     type: 'GET',
   }).done(function(response){
@@ -155,10 +161,10 @@ function displayTeamInfo(){
   console.log(next_fixtures[fixture_number]);
 
   if($(this).attr('location') == 'away'){
-    var queryURL = next_fixtures[fixture_number]._links.awayTeam.href;
+    var queryURL = createHTTPS(next_fixtures[fixture_number]._links.awayTeam.href);
   }
   else{
-    var queryURL = next_fixtures[fixture_number]._links.homeTeam.href;
+    var queryURL = createHTTPS(next_fixtures[fixture_number]._links.homeTeam.href);
   }
 
   getTeamInfo(queryURL);
@@ -176,7 +182,7 @@ function displayForm(){
     var draws = 0;
     var losses = 0;
 
-    console.log(queryURL);
+    queryURL = creatHTTPS($(this).attr('fixtures'));
     $.ajax({
       headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
       url: queryURL,
@@ -312,7 +318,7 @@ function displayForm(){
 
 function displaySquad(){
 
-  var queryURL = $(this).attr('players');
+  var queryURL = createHTTPS($(this).attr('players'));
 
   $.ajax({
     headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
@@ -456,6 +462,7 @@ $(document).on('click', '#back', function(){
 $(document).on('click', '#competitions', function(){
 
   $('#buttons-view').empty();
+
   $.ajax({
   headers: { 'X-Auth-Token': 'a1343c1c5d024bafb3c6be16564808e2' },
   url: 'https://api.football-data.org/v1/competitions/',
